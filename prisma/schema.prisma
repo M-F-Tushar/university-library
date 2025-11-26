@@ -1,0 +1,173 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  password  String
+  role      String     @default("STUDENT") // SQLite doesn't support Enums
+  bookmarks Bookmark[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Resource {
+  id          String     @id @default(cuid())
+  title       String
+  description String
+  author      String?    // New: Author name
+  year        Int?       // New: Publication year
+  format      String?    // New: PDF, ePub, PPT, etc.
+  fileUrl     String?
+  externalUrl String?
+  coverImage  String?    // New: Book cover or thumbnail
+  abstract    String?    // New: For research papers
+  fileSize    String?    // New: e.g. "5MB"
+  category    String     // e.g., "Books", "Questions", "Notes"
+  department  String
+  course      String?
+  semester    String?
+  tags        String     // Stored as comma-separated string
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  bookmarks   Bookmark[]
+}
+
+model Bookmark {
+  id         String   @id @default(cuid())
+  userId     String
+  resourceId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, resourceId])
+}
+
+// CMS Models for dynamic content management
+model SiteSettings {
+  id          String   @id @default(cuid())
+  key         String   @unique  // e.g., "hero_title", "hero_subtitle", "stat_resources"
+  value       String              // The actual content
+  type        String   @default("text") // "text", "number", "boolean", "json"
+  category    String              // "hero", "stats", "features", "general"
+  description String?             // Help text for admin
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?             // Admin user ID who last updated
+}
+
+model Feature {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String              // Icon name from Heroicons (e.g., "BookOpenIcon")
+  link        String?             // Optional link URL for clickable features
+  coverImage  String?             // Optional book cover image URL
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  type        String    @default("info")  // "info", "warning", "success", "error"
+  isActive    Boolean   @default(true)
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ExternalResource {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  description String
+  category    String   // "Learning Platforms", "Programming Practice", etc.
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PageComment {
+  id        String   @id @default(cuid())
+  pageUrl   String   // e.g., "/about", "/courses", "/external-resources"
+  userId    String
+  userName  String   // Denormalized for easier display
+  userEmail String   // Denormalized
+  comment   String
+  isApproved Boolean @default(false) // Admin must approve before showing
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  code        String   @unique // e.g., "CSE101"
+  name        String   // e.g., "Introduction to Programming"
+  description String?
+  department  String   // e.g., "Computer Science"
+  semester    String?  // e.g., "1st", "2nd"
+  credits     Int      @default(3)
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Semester {
+  id          String   @id @default(cuid())
+  name        String   // e.g. "1st Semester"
+  value       String   @unique // e.g. "1st" - used for URL params
+  description String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique // e.g., "Books", "Papers", "Questions"
+  description String?
+  icon        String   @default("BookOpenIcon") // Icon name from Heroicons
+  color       String   @default("bg-blue-100 text-blue-800 border-blue-200") // Tailwind classes
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g., "Computer Science"
+  code      String?  // e.g., "CS"
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Format {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g., "PDF"
+  extension String   // e.g., "pdf"
+  mimeType  String?  // e.g., "application/pdf"
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

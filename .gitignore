@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# log files
+*.log
+tsc_output.txt
+
+/app/generated/prisma
