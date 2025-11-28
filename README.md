@@ -11,6 +11,7 @@ A full-stack web application for university students to access books, past quest
 - **Authentication**: NextAuth.js v5
 
 ## Features
+
 - **User Roles**: Admin and Student.
 - **Resource Management**: Upload PDFs, add external links, categorize by department/course.
 - **Search & Filter**: Browse resources by category, department, semester.
