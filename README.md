@@ -7,7 +7,7 @@ A full-stack web application for university students to access books, past quest
 - **Framework**: Next.js 14+ (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Database**: SQLite (Local) / PostgreSQL (Production ready) via Prisma ORM
+- **Database**: SQLite (Local) / PostgreSQL (Production-ready) via Prisma ORM
 - **Authentication**: NextAuth.js v5
 
 ## Features
