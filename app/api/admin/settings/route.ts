@@ -1,13 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 import { auth } from '@/auth';
+import { z } from 'zod';
+import {
+    ApiError,
+    handleApiError,
+    successResponse,
+    errorResponse,
+} from '@/lib/api/error-handler';
+
+const settingsUpdateSchema = z.object({
+    settings: z.array(z.object({
+        key: z.string().min(1),
+        value: z.string(),
+    })),
+});
 
 // GET all settings or filter by category
 export async function GET(request: NextRequest) {
     try {
         const session = await auth();
         if (!session?.user || session.user.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            return errorResponse(ApiError.unauthorized('Admin access required'));
         }
 
         const { searchParams } = new URL(request.url);
@@ -19,10 +33,9 @@ export async function GET(request: NextRequest) {
             orderBy: { category: 'asc' },
         });
 
-        return NextResponse.json(settings);
+        return successResponse(settings);
     } catch (error) {
-        console.error('Error fetching settings:', error);
-        return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
+        return handleApiError(error);
     }
 }
 
@@ -31,18 +44,22 @@ export async function POST(request: NextRequest) {
     try {
         const session = await auth();
         if (!session?.user || session.user.role !== 'ADMIN') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            return errorResponse(ApiError.unauthorized('Admin access required'));
         }
 
         const body = await request.json();
-        const { settings } = body; // Array of { key, value }
+        const validated = settingsUpdateSchema.safeParse(body);
 
-        if (!Array.isArray(settings)) {
-            return NextResponse.json({ error: 'Settings must be an array' }, { status: 400 });
+        if (!validated.success) {
+            return errorResponse(
+                ApiError.badRequest('Invalid settings format', 'VALIDATION_ERROR', validated.error.flatten())
+            );
         }
 
+        const { settings } = validated.data;
+
         // Update each setting
-        const updates = settings.map((setting: { key: string; value: string }) =>
+        const updates = settings.map((setting) =>
             prisma.siteSettings.update({
                 where: { key: setting.key },
                 data: {
@@ -54,9 +71,8 @@ export async function POST(request: NextRequest) {
 
         await Promise.all(updates);
 
-        return NextResponse.json({ message: 'Settings updated successfully' });
+        return successResponse({ message: 'Settings updated successfully' });
     } catch (error) {
-        console.error('Error updating settings:', error);
-        return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 });
+        return handleApiError(error);
     }
 }

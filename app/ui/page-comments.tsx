@@ -7,7 +7,7 @@ interface Comment {
     id: string;
     userName: string;
     comment: string;
-    createdAt: string;
+    createdAt: Date | string;
 }
 
 interface PageCommentsProps {

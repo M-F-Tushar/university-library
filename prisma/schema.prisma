@@ -17,6 +17,9 @@ model User {
   password  String
   role      String     @default("STUDENT") // SQLite doesn't support Enums
   bookmarks Bookmark[]
+  activities UserActivity[]
+  readingProgress ReadingProgress[]
+  reviews   ResourceReview[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 }
@@ -41,6 +44,10 @@ model Resource {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   bookmarks   Bookmark[]
+  activities  UserActivity[]
+  readingProgress ReadingProgress[]
+  reviews     ResourceReview[]
+  rating      ResourceRating?
 }
 
 model Bookmark {
@@ -170,4 +177,65 @@ model Format {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model UserActivity {
+  id         String   @id @default(cuid())
+  userId     String
+  action     String   // 'view', 'bookmark', 'download', 'search'
+  resourceId String?
+  details    String?  // JSON string for extra details
+  createdAt  DateTime @default(now())
+  
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource   Resource? @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model ReadingProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  resourceId      String
+  currentPage     Int      @default(1)
+  totalPages      Int?
+  percentComplete Float    @default(0)
+  lastReadAt      DateTime @default(now())
+  
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, resourceId])
+  @@index([userId])
+  @@index([lastReadAt])
+}
+
+model ResourceReview {
+  id         String   @id @default(cuid())
+  userId     String
+  resourceId String
+  rating     Int      // 1-5 stars
+  review     String?  // Optional text review
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, resourceId])
+  @@index([resourceId])
+  @@index([isApproved])
+}
+
+model ResourceRating {
+  id            String   @id @default(cuid())
+  resourceId    String   @unique
+  averageRating Float    @default(0)
+  totalRatings  Int      @default(0)
+  totalReviews  Int      @default(0)
+  updatedAt     DateTime @updatedAt
+  
+  resource      Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 }

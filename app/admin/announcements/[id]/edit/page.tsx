@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
-export default function EditAnnouncementPage({ params }: { params: { id: string } }) {
+export default function EditAnnouncementPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -26,7 +27,7 @@ export default function EditAnnouncementPage({ params }: { params: { id: string 
 
     const fetchAnnouncement = async () => {
         try {
-            const response = await fetch(`/api/admin/announcements/${params.id}`);
+            const response = await fetch(`/api/admin/announcements/${id}`);
             if (response.ok) {
                 const announcement = await response.json();
                 setFormData({
@@ -48,7 +49,7 @@ export default function EditAnnouncementPage({ params }: { params: { id: string 
         setMessage('');
 
         try {
-            const response = await fetch(`/api/admin/announcements/${params.id}`, {
+            const response = await fetch(`/api/admin/announcements/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -75,7 +76,7 @@ export default function EditAnnouncementPage({ params }: { params: { id: string 
         if (!confirm('Are you sure you want to delete this announcement?')) return;
 
         try {
-            const response = await fetch(`/api/admin/announcements/${params.id}`, {
+            const response = await fetch(`/api/admin/announcements/${id}`, {
                 method: 'DELETE',
             });
 

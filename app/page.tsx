@@ -62,16 +62,16 @@ export default async function Home() {
   return (
     <main>
       {/* Hero Section */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-violet-600 to-purple-700 dark:from-blue-900 dark:via-violet-900 dark:to-purple-950 text-white" suppressHydrationWarning>
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-violet-600 to-purple-700 dark:from-blue-900 dark:via-violet-900 dark:to-purple-950 text-white">
         {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-20" suppressHydrationWarning>
-          <div className="absolute top-20 left-10 h-72 w-72 rounded-full bg-white/10 blur-3xl animate-pulse" suppressHydrationWarning></div>
-          <div className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-white/10 blur-3xl animate-pulse delay-1000" suppressHydrationWarning></div>
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-20 left-10 h-72 w-72 rounded-full bg-white/10 blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-white/10 blur-3xl animate-pulse delay-1000"></div>
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32" suppressHydrationWarning>
-          <div className="text-center" suppressHydrationWarning>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-4 py-2 text-sm font-medium border border-white/20" suppressHydrationWarning>
+        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
+          <div className="text-center">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-4 py-2 text-sm font-medium border border-white/20">
               <SparklesIcon className="h-4 w-4" />
               <span>{heroBadge}</span>
             </div>
@@ -84,7 +84,7 @@ export default async function Home() {
             <p className="mx-auto mt-6 max-w-2xl text-xl text-blue-100 leading-relaxed">
               {heroSubtitle}
             </p>
-            <div className="mt-10 flex justify-center" suppressHydrationWarning>
+            <div className="mt-10 flex justify-center">
               <Link
                 href={heroCta1Link}
                 className="group relative inline-flex items-center justify-center rounded-xl bg-white dark:bg-gray-900 px-8 py-4 text-base font-semibold text-blue-600 dark:text-blue-400 shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-200"
@@ -96,18 +96,18 @@ export default async function Home() {
             </div>
 
             {/* Stats */}
-            <div className="mt-16 grid grid-cols-3 gap-8 text-center" suppressHydrationWarning>
-              <div suppressHydrationWarning>
-                <div className="text-4xl font-bold" suppressHydrationWarning>{statResourcesNum}</div>
-                <div className="mt-1 text-sm text-blue-200" suppressHydrationWarning>{statResourcesLabel}</div>
+            <div className="mt-16 grid grid-cols-3 gap-8 text-center">
+              <div>
+                <div className="text-4xl font-bold">{statResourcesNum}</div>
+                <div className="mt-1 text-sm text-blue-200">{statResourcesLabel}</div>
               </div>
-              <div suppressHydrationWarning>
-                <div className="text-4xl font-bold" suppressHydrationWarning>{statStudentsNum}</div>
-                <div className="mt-1 text-sm text-blue-200" suppressHydrationWarning>{statStudentsLabel}</div>
+              <div>
+                <div className="text-4xl font-bold">{statStudentsNum}</div>
+                <div className="mt-1 text-sm text-blue-200">{statStudentsLabel}</div>
               </div>
-              <div suppressHydrationWarning>
-                <div className="text-4xl font-bold" suppressHydrationWarning>{statAccessNum}</div>
-                <div className="mt-1 text-sm text-blue-200" suppressHydrationWarning>{statAccessLabel}</div>
+              <div>
+                <div className="text-4xl font-bold">{statAccessNum}</div>
+                <div className="mt-1 text-sm text-blue-200">{statAccessLabel}</div>
               </div>
             </div>
           </div>
@@ -115,9 +115,9 @@ export default async function Home() {
       </div>
 
       {/* Features Section */}
-      <div id="features" className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black" suppressHydrationWarning>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
-          <div className="text-center mb-16" suppressHydrationWarning>
+      <div id="features" className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
             <h2 className="text-base font-semibold text-blue-600 dark:text-blue-400 tracking-wide uppercase">Features</h2>
             <p className="mt-2 text-4xl font-extrabold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent sm:text-5xl">
               {featuresTitle}
@@ -127,12 +127,12 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3" suppressHydrationWarning>
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {features.map((feature: { id: string; title: string; description: string; icon: string; link?: string | null; coverImage?: string | null }) => {
               const Icon = iconMap[feature.icon] || BookOpenIcon;
               const CardContent = (
-                <div className={`group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 ${feature.link ? 'cursor-pointer' : ''}`} suppressHydrationWarning>
-                  <div className="relative" suppressHydrationWarning>
+                <div className={`group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 ${feature.link ? 'cursor-pointer' : ''}`}>
+                  <div className="relative">
                     {feature.coverImage ? (
                       <div className="relative h-48 w-full mb-6">
                         <Image
@@ -144,7 +144,7 @@ export default async function Home() {
                         />
                       </div>
                     ) : (
-                      <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg group-hover:scale-110 transition-transform duration-300 mb-6" suppressHydrationWarning>
+                      <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg group-hover:scale-110 transition-transform duration-300 mb-6">
                         <Icon className="h-8 w-8 text-white" />
                       </div>
                     )}
@@ -157,11 +157,11 @@ export default async function Home() {
               );
 
               return feature.link ? (
-                <Link key={feature.id} href={feature.link} suppressHydrationWarning>
+                <Link key={feature.id} href={feature.link}>
                   {CardContent}
                 </Link>
               ) : (
-                <div key={feature.id} suppressHydrationWarning>
+                <div key={feature.id}>
                   {CardContent}
                 </div>
               );
@@ -172,3 +172,4 @@ export default async function Home() {
     </main>
   );
 }
+

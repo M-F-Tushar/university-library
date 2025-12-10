@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
+import Image from 'next/image';
 import { FunnelIcon, BookOpenIcon, AcademicCapIcon, DocumentTextIcon, PresentationChartBarIcon, TagIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Pagination from '@/app/ui/pagination';
 import SearchWithSuggestions from '@/app/ui/search-with-suggestions';
@@ -202,12 +203,14 @@ export default async function ResourcesPage({
                             <div className="h-full overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 flex flex-col">
                                 {resource.coverImage ? (
                                     <div className="h-48 w-full overflow-hidden bg-gray-100 dark:bg-gray-900 relative">
-                                        <img
+                                        <Image
                                             src={resource.coverImage}
                                             alt={resource.title}
-                                            className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         />
-                                        <div className="absolute top-2 right-2">
+                                        <div className="absolute top-2 right-2 z-10">
                                             <span className={`inline-flex items-center rounded-lg border px-3 py-1 text-xs font-semibold shadow-sm ${categoryColors[resource.category] || categoryColors['Others']}`}>
                                                 {resource.category}
                                             </span>

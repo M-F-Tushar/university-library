@@ -1,0 +1,9 @@
+@echo off
+echo Stopping dev server and clearing all caches...
+taskkill /F /IM node.exe 2>nul
+timeout /t 2 /nobreak >nul
+echo Clearing build caches...
+rmdir /s /q .next 2>nul
+rmdir /s /q node_modules\.cache 2>nul
+echo Starting fresh dev server...
+npm run dev

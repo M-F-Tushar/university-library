@@ -15,10 +15,13 @@ import {
     RectangleStackIcon,
     BuildingOfficeIcon,
     DocumentDuplicateIcon,
+    ChatBubbleLeftIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
+    { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
+    { name: 'Reviews', href: '/admin/reviews', icon: ChatBubbleLeftIcon },
     { name: 'Site Settings', href: '/admin/settings', icon: Cog6ToothIcon },
     { name: 'Features', href: '/admin/features', icon: SparklesIcon },
     { name: 'Categories', href: '/admin/categories', icon: RectangleStackIcon },
