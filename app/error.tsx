@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
-import { Button } from '@/components/ui/Button'
 import { logger } from '@/lib/monitoring/logger'
 
 export default function Error({
@@ -30,7 +29,7 @@ export default function Error({
                     Oops! Something went wrong
                 </h1>
                 <p className="text-gray-600 mb-6">
-                    We encountered an unexpected error. Don't worry, our team has been notified.
+                    We encountered an unexpected error. Do not worry, our team has been notified.
                 </p>
                 {process.env.NODE_ENV === 'development' && (
                     <div className="mb-6 p-4 bg-red-50 rounded-lg text-left">
@@ -46,12 +45,18 @@ export default function Error({
                     </div>
                 )}
                 <div className="flex gap-3 justify-center">
-                    <Button onClick={reset}>
+                    <button
+                        onClick={reset}
+                        className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-violet-700 transition-all"
+                    >
                         Try Again
-                    </Button>
-                    <Button variant="secondary" onClick={() => window.location.href = '/'}>
+                    </button>
+                    <button
+                        onClick={() => window.location.href = '/'}
+                        className="px-6 py-2.5 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition-all"
+                    >
                         Go Home
-                    </Button>
+                    </button>
                 </div>
             </div>
         </div>

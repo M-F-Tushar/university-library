@@ -239,3 +239,15 @@ model ResourceRating {
   
   resource      Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 }
+
+// Email verification for magic link authentication
+model VerificationToken {
+  id         String   @id @default(cuid())
+  email      String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  
+  @@index([email])
+  @@index([token])
+}

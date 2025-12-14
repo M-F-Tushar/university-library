@@ -30,6 +30,9 @@ async function main() {
 
         // General
         { key: 'site_name', value: 'UniLibrary', category: 'general', type: 'text', description: 'Site name' },
+
+        // Authentication Settings
+        { key: 'allowed_email_domain', value: '@university.edu', category: 'auth', type: 'text', description: 'Allowed email domain for student login (e.g., @uiu.ac.bd)' },
     ];
 
     for (const setting of siteSettings) {

@@ -60,7 +60,7 @@ export async function getDashboardData() {
     const session = await auth()
     if (!session?.user?.id) return null
 
-    const [recentActivity, continueReading, recommended] = await Promise.all([
+    const [recentActivity, continueReading, recommended, stats] = await Promise.all([
         // Recent Activity - only fetch needed fields
         prisma.userActivity.findMany({
             where: { userId: session.user.id },
@@ -115,12 +115,18 @@ export async function getDashboardData() {
                 category: true,
                 department: true,
             }
-        })
+        }),
+        // Stats
+        Promise.all([
+            prisma.bookmark.count({ where: { userId: session.user.id } }),
+            prisma.readingProgress.count({ where: { userId: session.user.id, percentComplete: { gte: 100 } } }),
+        ]).then(([bookmarks, completed]) => ({ bookmarks, completed }))
     ])
 
     return {
         recentActivity,
         continueReading,
         recommended,
+        stats,
     }
 }

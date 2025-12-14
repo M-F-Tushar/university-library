@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { MagnifyingGlassIcon, HomeIcon, BookOpenIcon } from '@heroicons/react/24/outline'
-import { Button } from '@/components/ui/Button'
 
 export default function NotFound() {
   return (
@@ -14,28 +13,31 @@ export default function NotFound() {
             Page Not Found
           </h2>
           <p className="text-gray-600 text-lg">
-            Sorry, we couldn't find the page you're looking for.
+            Sorry, we could not find the page you are looking for.
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-          <Link href="/">
-            <Button className="inline-flex items-center gap-2">
-              <HomeIcon className="h-5 w-5" />
-              Go Home
-            </Button>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-violet-700 transition-all"
+          >
+            <HomeIcon className="h-5 w-5" />
+            Go Home
           </Link>
-          <Link href="/resources">
-            <Button variant="secondary" className="inline-flex items-center gap-2">
-              <BookOpenIcon className="h-5 w-5" />
-              Browse Resources
-            </Button>
+          <Link
+            href="/resources"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all"
+          >
+            <BookOpenIcon className="h-5 w-5" />
+            Browse Resources
           </Link>
-          <Link href="/search">
-            <Button variant="secondary" className="inline-flex items-center gap-2">
-              <MagnifyingGlassIcon className="h-5 w-5" />
-              Search
-            </Button>
+          <Link
+            href="/search"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all"
+          >
+            <MagnifyingGlassIcon className="h-5 w-5" />
+            Search
           </Link>
         </div>
 
