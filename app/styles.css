@@ -11,13 +11,18 @@
 
     /* Brand Colors */
     --color-primary-50: #eff6ff;
-    --color-primary-500: #3b82f6;
-    --color-primary-600: #2563eb;
-    --color-primary-700: #1d4ed8;
+    --color-primary-100: #dbeafe;
+    --color-primary-500: #3b82f6; /* Keep as fallback/reference */
+    --color-primary-600: #0066cc; /* New Primary */
+    --color-primary-700: #004c99;
+
+    --color-secondary: #00a86b; /* Teal */
+    --color-accent: #ffb84d; /* Gold */
 
     --color-success: #10b981;
     --color-warning: #f59e0b;
     --color-error: #ef4444;
+    --color-info: #3b82f6;
 
     /* Typography */
     --font-sans: 'Inter', system-ui, sans-serif;
@@ -32,6 +37,7 @@
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-card-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
 :root {

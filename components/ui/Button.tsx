@@ -17,17 +17,17 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ 
-        className, 
-        variant = "primary", 
-        size = "md", 
+    ({
+        className,
+        variant = "primary",
+        size = "md",
         loading = false,
         icon,
         iconPosition = "left",
         fullWidth = false,
         disabled,
         children,
-        ...props 
+        ...props
     }, ref) => {
         const isDisabled = disabled || loading
 
@@ -35,20 +35,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             <button
                 className={cn(
                     // Base styles
-                    "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-all duration-200",
+                    "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 font-sans tracking-wide",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2",
                     "disabled:pointer-events-none disabled:opacity-50",
                     "active:scale-[0.98]",
                     // Variants
                     {
                         // Primary
-                        "bg-primary-600 text-white hover:bg-primary-700 shadow-sm hover:shadow-md":
+                        "bg-primary-600 text-white hover:bg-primary-700 shadow-lg hover:shadow-primary-500/25":
                             variant === "primary",
                         // Secondary
                         "bg-white text-gray-900 border border-gray-200 hover:bg-gray-50 shadow-sm hover:border-gray-300":
                             variant === "secondary",
                         // Ghost
-                        "hover:bg-gray-100 text-gray-700 hover:text-gray-900": 
+                        "hover:bg-gray-100 text-gray-700 hover:text-gray-900 dark:hover:bg-gray-800 dark:text-gray-300 dark:hover:text-white":
                             variant === "ghost",
                         // Destructive
                         "bg-error text-white hover:bg-red-600 shadow-sm hover:shadow-md":
@@ -62,11 +62,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                     },
                     // Sizes
                     {
-                        "h-7 px-2 text-xs rounded": size === "xs",
-                        "h-8 px-3 text-xs": size === "sm",
-                        "h-10 px-4 py-2 text-sm": size === "md",
-                        "h-11 px-6 text-base": size === "lg",
-                        "h-12 px-8 text-lg": size === "xl",
+                        "h-8 px-3 text-xs": size === "xs",
+                        "h-9 px-4 text-sm": size === "sm",
+                        "h-11 px-6 text-base": size === "md",
+                        "h-12 px-8 text-lg": size === "lg",
+                        "h-14 px-10 text-xl": size === "xl",
                     },
                     // Full width
                     fullWidth && "w-full",
@@ -84,15 +84,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                         <LoadingSpinner size={size} />
                     </span>
                 )}
-                
+
                 {/* Icon left */}
                 {icon && iconPosition === "left" && !loading && (
                     <span className="shrink-0">{icon}</span>
                 )}
-                
+
                 {/* Content */}
                 {children}
-                
+
                 {/* Icon right */}
                 {icon && iconPosition === "right" && !loading && (
                     <span className="shrink-0">{icon}</span>

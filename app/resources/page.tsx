@@ -1,11 +1,17 @@
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FunnelIcon, BookOpenIcon, AcademicCapIcon, DocumentTextIcon, PresentationChartBarIcon, TagIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { TagIcon, MagnifyingGlassIcon, BookOpenIcon, DocumentTextIcon, AcademicCapIcon, PresentationChartBarIcon } from '@heroicons/react/24/outline';
 import Pagination from '@/app/ui/pagination';
 import SearchWithSuggestions from '@/app/ui/search-with-suggestions';
 import { auth } from '@/auth';
 import PageComments from '@/app/ui/page-comments';
+import { FilterSidebar } from "@/components/search/FilterSidebar";
+import { ResourceCard } from "@/components/resources/ResourceCard";
+
+import { ViewToggle } from "@/components/resources/ViewToggle";
+import { MobileFilterDrawer } from "@/components/search/MobileFilterDrawer";
+import { Prisma } from '@prisma/client';
 
 export default async function ResourcesPage({
     searchParams,
@@ -14,17 +20,40 @@ export default async function ResourcesPage({
 }) {
     const resolvedSearchParams = await searchParams;
     const search = typeof resolvedSearchParams.search === 'string' ? resolvedSearchParams.search : undefined;
-    const category = typeof resolvedSearchParams.category === 'string' ? resolvedSearchParams.category : undefined;
+    // Allow string or array for category to support combined filters like "Notes & Slides"
+    const category = resolvedSearchParams.category;
+
     const department = typeof resolvedSearchParams.department === 'string' ? resolvedSearchParams.department : undefined;
     const semester = typeof resolvedSearchParams.semester === 'string' ? resolvedSearchParams.semester : undefined;
     const year = typeof resolvedSearchParams.year === 'string' ? Number(resolvedSearchParams.year) : undefined;
     const format = typeof resolvedSearchParams.format === 'string' ? resolvedSearchParams.format : undefined;
+    const view = typeof resolvedSearchParams.view === 'string' && resolvedSearchParams.view === 'list' ? 'list' : 'grid';
     const currentPage = Number(resolvedSearchParams.page) || 1;
 
     const ITEMS_PER_PAGE = 9;
     const skip = (currentPage - 1) * ITEMS_PER_PAGE;
 
-    const where: any = {};
+    const sessionParam = typeof resolvedSearchParams.session === 'string' ? resolvedSearchParams.session : undefined;
+    const level = typeof resolvedSearchParams.level === 'string' ? resolvedSearchParams.level : undefined;
+
+
+
+    const where: Prisma.ResourceWhereInput = {};
+
+    // Handle Session (e.g., "Spring 2024")
+    if (sessionParam) {
+        const [sem, yr] = sessionParam.split(' ');
+        if (sem) where.semester = sem;
+        if (yr) where.year = parseInt(yr);
+    }
+
+    // Handle Level (e.g., "100 Level")
+    if (level) {
+        const levelNum = level.charAt(0); // "1", "2", etc.
+        // Assumes course codes like "CSE-1xx"
+        where.course = { contains: `-${levelNum}` };
+    }
+
     if (search) {
         where.OR = [
             { title: { contains: search } },
@@ -34,10 +63,21 @@ export default async function ResourcesPage({
             { tags: { contains: search } },
         ];
     }
-    if (category) where.category = category;
+
+    // Handle Category (Single or Multiple)
+    if (category) {
+        if (Array.isArray(category)) {
+            where.category = { in: category };
+        } else {
+            where.category = category;
+        }
+    }
     if (department) where.department = department;
+
+    // Explicit semester/year overrides session if provided
     if (semester) where.semester = semester;
     if (year) where.year = year;
+
     if (format) where.format = format;
 
     const [resources, totalResources, comments, session] = await Promise.all([
@@ -97,204 +137,114 @@ export default async function ResourcesPage({
     // Fallback for any category not in database
     categoryColors['Others'] = 'bg-gray-100 text-gray-800 border-gray-200';
 
+    // Prepare facets for FilterSidebar
+    const facets = {
+        categories: categories,
+        departments: ["Computer Science", "Engineering", "Mathematics", "Physics", "Business"],
+        semesters: semesters,
+        formats: formats,
+    };
+
     return (
-        <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black p-6 max-w-7xl mx-auto">
-            <div className="mb-8">
-                <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent mb-2">
-                    Browse Resources
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">Discover and access academic materials, books, and papers.</p>
-            </div>
+        <main className="min-h-screen bg-gray-50 dark:bg-black p-6">
+            <div className="max-w-7xl mx-auto">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold font-display text-gray-900 dark:text-white mb-2">
+                        Browse Resources
+                    </h1>
+                    <p className="text-gray-600 dark:text-gray-400">Discover and access academic materials, books, and papers.</p>
+                </div>
 
-            {/* Quick Topic Filters */}
-            <div className="mb-6 flex flex-wrap gap-2">
-                <span className="text-sm font-medium text-gray-500 dark:text-gray-400 self-center mr-2">Popular Topics:</span>
-                {topics.map((topic) => (
-                    <Link
-                        key={topic.name}
-                        href={`/resources?search=${topic.query}`}
-                        className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                    >
-                        <TagIcon className="w-3 h-3 mr-1.5" />
-                        {topic.name}
-                    </Link>
-                ))}
-            </div>
-
-            <div className="mb-8 flex flex-col gap-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                <form className="flex flex-col gap-4">
-                    <div className="flex flex-col md:flex-row gap-3">
-                        <SearchWithSuggestions />
-
-                        <button
-                            type="submit"
-                            className="rounded-lg bg-gradient-to-r from-blue-600 to-violet-600 px-6 py-2.5 text-white font-medium hover:from-blue-700 hover:to-violet-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap"
-                        >
-                            Search
-                        </button>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div className="relative">
-                            <select
-                                name="category"
-                                defaultValue={category}
-                                className="w-full appearance-none rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 border pl-3 pr-8 py-2 text-sm transition-all"
-                            >
-                                <option value="">All Categories</option>
-                                {categories.map((cat) => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                            <FunnelIcon className="absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <div className="flex flex-col lg:flex-row gap-8">
+                    {/* Sidebar / Mobile Drawer */}
+                    <aside className="hidden lg:block w-64 flex-shrink-0">
+                        <div className="sticky top-24">
+                            <FilterSidebar facets={facets} />
                         </div>
-                        <div className="relative">
-                            <select
-                                name="semester"
-                                defaultValue={semester}
-                                className="w-full appearance-none rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 border pl-3 pr-8 py-2 text-sm transition-all"
-                            >
-                                <option value="">All Semesters</option>
-                                {semesters.map((sem) => (
-                                    <option key={sem} value={sem}>{sem} Sem</option>
-                                ))}
-                            </select>
-                            <FunnelIcon className="absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                        </div>
-                        <div className="relative">
-                            <select
-                                name="format"
-                                defaultValue={format}
-                                className="w-full appearance-none rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 border pl-3 pr-8 py-2 text-sm transition-all"
-                            >
-                                <option value="">All Formats</option>
-                                {formats.map((fmt) => (
-                                    <option key={fmt} value={fmt}>{fmt}</option>
-                                ))}
-                            </select>
-                            <FunnelIcon className="absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                        </div>
-                        <div className="relative">
-                            <select
-                                name="year"
-                                defaultValue={year}
-                                className="w-full appearance-none rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 border pl-3 pr-8 py-2 text-sm transition-all"
-                            >
-                                <option value="">All Years</option>
-                                {years.map((y) => (
-                                    <option key={y} value={y}>{y}</option>
-                                ))}
-                            </select>
-                            <FunnelIcon className="absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                        </div>
-                    </div>
-                </form>
-            </div>
+                    </aside>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {resources.map((resource) => {
-                    const Icon = categoryIcons[resource.category] || BookOpenIcon;
-                    return (
-                        <Link
-                            key={resource.id}
-                            href={`/resources/${resource.id}`}
-                            className="group"
-                        >
-                            <div className="h-full overflow-hidden rounded-xl bg-white dark:bg-gray-800 shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 flex flex-col">
-                                {resource.coverImage ? (
-                                    <div className="h-48 w-full overflow-hidden bg-gray-100 dark:bg-gray-900 relative">
-                                        <Image
-                                            src={resource.coverImage}
-                                            alt={resource.title}
-                                            fill
-                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                        />
-                                        <div className="absolute top-2 right-2 z-10">
-                                            <span className={`inline-flex items-center rounded-lg border px-3 py-1 text-xs font-semibold shadow-sm ${categoryColors[resource.category] || categoryColors['Others']}`}>
-                                                {resource.category}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="h-48 w-full bg-gradient-to-br from-blue-50 to-violet-50 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center relative">
-                                        <Icon className="h-16 w-16 text-blue-200 dark:text-gray-600" />
-                                        <div className="absolute top-2 right-2">
-                                            <span className={`inline-flex items-center rounded-lg border px-3 py-1 text-xs font-semibold shadow-sm ${categoryColors[resource.category] || categoryColors['Others']}`}>
-                                                {resource.category}
-                                            </span>
-                                        </div>
-                                    </div>
-                                )}
+                    {/* Mobile Filters */}
+                    <MobileFilterDrawer facets={facets} />
 
-                                <div className="p-6 flex-1 flex flex-col">
-                                    <div className="flex items-start justify-between mb-2">
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                                            {resource.year ? resource.year : new Date(resource.createdAt).getFullYear()}
-                                        </span>
-                                        {resource.format && (
-                                            <span className="text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded">
-                                                {resource.format}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2 mb-1" title={resource.title}>
-                                        {resource.title}
-                                    </h3>
-
-                                    {resource.author && (
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 italic">
-                                            by {resource.author}
-                                        </p>
-                                    )}
-
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-4 flex-1">
-                                        {resource.description}
-                                    </p>
-
-                                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700 mt-auto">
-                                        <div className="flex gap-2">
-                                            {resource.course && (
-                                                <span className="inline-flex items-center text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded-md">
-                                                    {resource.course}
-                                                </span>
-                                            )}
-                                            {resource.semester && (
-                                                <span className="inline-flex items-center text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded-md">
-                                                    {resource.semester} Sem
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                    {/* Main Content */}
+                    <div className="flex-1">
+                        {/* Search Bar */}
+                        <div className="mb-6 flex gap-4">
+                            <div className="flex-1">
+                                <SearchWithSuggestions />
                             </div>
-                        </Link>
-                    );
-                })}
-            </div>
+                            <div className="hidden sm:block">
+                                <button
+                                    className="h-full rounded-lg bg-primary-600 px-6 font-medium text-white hover:bg-primary-700 transition-colors shadow-sm"
+                                >
+                                    Search
+                                </button>
+                            </div>
+                        </div>
 
-            {resources.length === 0 ? (
-                <div className="text-center py-16">
-                    <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 mb-4">
-                        <MagnifyingGlassIcon className="h-8 w-8 text-gray-400" />
+                        {/* Quick Topic Filters (Pills) */}
+                        <div className="mb-6 flex flex-wrap gap-2">
+                            {topics.map((topic) => (
+                                <Link
+                                    key={topic.name}
+                                    href={`/resources?search=${topic.query}`}
+                                    className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                                >
+                                    <TagIcon className="w-3 h-3 mr-1.5" />
+                                    {topic.name}
+                                </Link>
+                            ))}
+                        </div>
+
+                        {/* Results Count & Sort */}
+                        <div className="flex items-center justify-between mb-6">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                                Showing <span className="font-semibold text-gray-900 dark:text-white">{resources.length}</span> of <span className="font-semibold text-gray-900 dark:text-white">{totalResources}</span> resources
+                            </span>
+                            <ViewToggle />
+                        </div>
+
+                        {/* Resource Grid */}
+                        {resources.length === 0 ? (
+                            <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-900 mb-4">
+                                    <MagnifyingGlassIcon className="h-8 w-8 text-gray-400" />
+                                </div>
+                                <p className="text-lg font-medium text-gray-900 dark:text-white mb-1">No resources found</p>
+                                <p className="text-gray-500 dark:text-gray-400">Try adjusting your filters or search query</p>
+                                <button
+                                    className="mt-4 text-primary-600 hover:underline font-medium"
+                                >
+                                    Clear all filters
+                                </button>
+                            </div>
+                        ) : (
+                            <div className={view === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+                                {resources.map((resource) => (
+                                    <ResourceCard
+                                        key={resource.id}
+                                        resource={{ ...resource, type: resource.category }}
+                                        variant={view}
+                                    />
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="mt-8 flex w-full justify-center">
+                            <Pagination totalPages={totalPages} />
+                        </div>
+
+                        {/* Comments Section */}
+                        <div className="mt-12 bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-100 dark:border-gray-700">
+                            <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Community Discussion</h3>
+                            <PageComments
+                                pageUrl="/resources"
+                                comments={comments}
+                                userSession={session?.user ? { name: session.user.name!, email: session.user.email! } : null}
+                            />
+                        </div>
                     </div>
-                    <p className="text-lg font-medium text-gray-900 dark:text-white mb-1">No resources found</p>
-                    <p className="text-gray-500 dark:text-gray-400">Try adjusting your search or filters</p>
                 </div>
-            ) : (
-                <div className="mt-8 flex w-full justify-center">
-                    <Pagination totalPages={totalPages} />
-                </div>
-            )}
-
-            {/* Comments Section */}
-            <div className="mt-12">
-                <PageComments
-                    pageUrl="/resources"
-                    comments={comments}
-                    userSession={session?.user ? { name: session.user.name!, email: session.user.email! } : null}
-                />
             </div>
         </main>
     );

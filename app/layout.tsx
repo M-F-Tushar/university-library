@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import "./styles.css";
-import Navbar from "@/app/ui/navbar";
+// import Navbar from "@/app/ui/navbar";
+import { GlobalHeader } from "@/components/navigation/GlobalHeader";
 import Footer from "@/app/ui/footer";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { SkipLink } from "@/components/accessibility/SkipLink";
 import { RouteAnnouncer } from "@/components/accessibility/RouteAnnouncer";
 import { ToastProvider } from "@/components/ui/Toast";
+import { ThemeProvider } from "@/components/theme-provider";
 import prisma from "@/lib/prisma";
 
 export const viewport: Viewport = {
@@ -75,17 +77,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-gray-50 min-h-screen flex flex-col antialiased font-sans" suppressHydrationWarning>
-        <ToastProvider>
-          <SkipLink />
-          <RouteAnnouncer />
-          <Navbar />
-          <main id="main-content" className="flex-1 container mx-auto px-4 py-6 focus:outline-none" tabIndex={-1}>
-            <Breadcrumbs />
-            {children}
-          </main>
-          <Footer />
-        </ToastProvider>
+      <body className="bg-gray-50 min-h-screen flex flex-col antialiased font-sans dark:bg-black dark:text-white" suppressHydrationWarning>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ToastProvider>
+            <SkipLink />
+            <RouteAnnouncer />
+            <GlobalHeader user={null} />
+            <main id="main-content" className="flex-1 container mx-auto px-4 py-6 focus:outline-none" tabIndex={-1}>
+              <Breadcrumbs />
+              {children}
+            </main>
+            <Footer />
+          </ToastProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

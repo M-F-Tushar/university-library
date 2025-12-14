@@ -174,6 +174,38 @@ async function main() {
         await prisma.resource.create({ data: note });
     }
 
+    // 5. Labs & Projects
+    const labsAndProjects = [
+        {
+            title: 'Networking Lab Manual',
+            author: 'Dept. of CSE',
+            year: 2024,
+            format: 'PDF',
+            description: 'Step-by-step guide for Cisco Packet Tracer experiments.',
+            category: 'Labs',
+            department: 'Computer Science',
+            course: 'CS305',
+            semester: '3rd',
+            tags: 'networking, lab, cisco',
+        },
+        {
+            title: 'Library Management System Project',
+            author: 'Student Group A',
+            year: 2023,
+            format: 'ZIP',
+            description: 'Source code and documentation for a web-based library system.',
+            category: 'Projects',
+            department: 'Software Engineering',
+            course: 'SE401',
+            semester: '4th',
+            tags: 'project, web, capstone',
+        }
+    ];
+
+    for (const item of labsAndProjects) {
+        await prisma.resource.create({ data: item });
+    }
+
     // Site Settings
     const siteSettings = [
         // Hero Section
@@ -224,6 +256,10 @@ async function main() {
         { name: 'Questions', description: 'Past exam questions and practice problems', icon: 'AcademicCapIcon', color: 'bg-violet-100 text-violet-800 border-violet-200', order: 3 },
         { name: 'Notes', description: 'Lecture notes and study materials', icon: 'DocumentTextIcon', color: 'bg-purple-100 text-purple-800 border-purple-200', order: 4 },
         { name: 'Slides', description: 'Presentation slides and lecture materials', icon: 'PresentationChartBarIcon', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', order: 5 },
+        { name: 'Labs', description: 'Lab manuals and experiment guides', icon: 'BeakerIcon', color: 'bg-orange-100 text-orange-800 border-orange-200', order: 6 },
+        { name: 'Assignments', description: 'Homework assignments and problem sets', icon: 'ClipboardDocumentListIcon', color: 'bg-amber-100 text-amber-800 border-amber-200', order: 7 },
+        { name: 'Projects', description: 'Project reports and codebase', icon: 'CodeBracketSquareIcon', color: 'bg-pink-100 text-pink-800 border-pink-200', order: 8 },
+        { name: 'Reports', description: 'Technical reports and case studies', icon: 'DocumentChartBarIcon', color: 'bg-rose-100 text-rose-800 border-rose-200', order: 9 },
     ];
 
     for (const category of categories) {

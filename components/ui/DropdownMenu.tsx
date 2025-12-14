@@ -84,7 +84,7 @@ interface DropdownMenuTriggerProps extends React.ButtonHTMLAttributes<HTMLButton
 }
 
 const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, DropdownMenuTriggerProps>(
-    ({ className, children, ...props }, forwardedRef) => {
+    ({ className, children, asChild, ...props }, forwardedRef) => {
         const { isOpen, setIsOpen, triggerRef } = useDropdownMenu()
 
         // Merge refs
@@ -99,6 +99,22 @@ const DropdownMenuTrigger = React.forwardRef<HTMLButtonElement, DropdownMenuTrig
             },
             [forwardedRef, triggerRef]
         )
+
+        const handleClick = (e: React.MouseEvent) => {
+            setIsOpen(!isOpen)
+            props.onClick?.(e as React.MouseEvent<HTMLButtonElement>)
+        }
+
+        if (asChild && React.isValidElement(children)) {
+            return React.cloneElement(children as React.ReactElement<any>, {
+                ref,
+                "aria-expanded": isOpen,
+                "aria-haspopup": "menu",
+                onClick: handleClick,
+                className: cn((children.props as any).className, className),
+                ...props
+            })
+        }
 
         return (
             <button
