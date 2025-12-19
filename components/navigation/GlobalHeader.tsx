@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Menu, University } from "lucide-react";
 import { SearchWidget } from "./SearchWidget";
 import { UserMenu } from "./UserMenu";
@@ -19,6 +20,9 @@ interface GlobalHeaderProps {
 }
 
 export function GlobalHeader({ user }: GlobalHeaderProps) {
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-gray-900/95 dark:border-gray-800">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
@@ -71,19 +75,34 @@ export function GlobalHeader({ user }: GlobalHeaderProps) {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden lg:flex items-center gap-1">
-                        <Link href="/courses" className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors">
+                        <Link href="/courses" className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${pathname === '/courses'
+                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
+                            : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }`}>
                             Courses
                         </Link>
-                        <Link href="/resources?category=Questions" className="px-3 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-md transition-colors">
+                        <Link href="/resources?category=Questions" className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${pathname === '/resources' && searchParams.get('category') === 'Questions'
+                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
+                            : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }`}>
                             Past Questions
                         </Link>
-                        <Link href="/resources" className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors">
+                        <Link href="/resources" className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${pathname === '/resources' && !searchParams.get('category')
+                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
+                            : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }`}>
                             Resources
                         </Link>
-                        <Link href="/leaderboard" className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors">
+                        <Link href="/leaderboard" className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${pathname === '/leaderboard'
+                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
+                            : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }`}>
                             Leaderboard
                         </Link>
-                        <Link href="/tools" className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors">
+                        <Link href="/tools" className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${pathname === '/tools'
+                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
+                            : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }`}>
                             Tools
                         </Link>
                     </nav>

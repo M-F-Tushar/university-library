@@ -38,7 +38,9 @@ export default async function ResourcesPage({
 
 
 
-    const where: Prisma.ResourceWhereInput = {};
+    const where: Prisma.ResourceWhereInput = {
+        isApproved: true, // Only show approved resources to public
+    };
 
     // Handle Session (e.g., "Spring 2024")
     if (sessionParam) {
@@ -88,11 +90,15 @@ export default async function ResourcesPage({
 
     // Merge course conditions
     if (Object.keys(courseConditions).length > 0) {
-        if (where.course && typeof where.course === 'object' && !Array.isArray(where.course)) {
-            // If where.course is already an object (RelationFilter), merge into it
-            where.course = { ...where.course, ...courseConditions };
+        if (where.course) {
+            // Use AND to safely combine existing course filters with new specific conditions
+            where.course = {
+                AND: [
+                    where.course as Prisma.CourseWhereInput,
+                    courseConditions
+                ]
+            };
         } else {
-            // Otherwise, just set it
             where.course = courseConditions;
         }
     }
@@ -199,13 +205,23 @@ export default async function ResourcesPage({
     };
 
     return (
-        <main className="min-h-screen bg-gray-50 dark:bg-black p-6">
-            <div className="max-w-7xl mx-auto">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold font-display text-gray-900 dark:text-white mb-2">
-                        Browse Resources
-                    </h1>
-                    <p className="text-gray-600 dark:text-gray-400">Discover and access academic materials, books, and papers.</p>
+        <main className="min-h-screen bg-gray-50 dark:bg-black pb-20 pt-8 lg:pt-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Header Section - Aligned with Courses Page */}
+                <div className="mb-10 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                            CSTU CSE Resources
+                        </h1>
+                        <p className="mt-2 text-gray-500 dark:text-gray-400">
+                            Access past questions, notes, slides, and study materials for CSE courses.
+                        </p>
+                    </div>
+
+                    <div className="flex w-full items-center gap-2 md:w-auto">
+                        {/* View Toggle */}
+                        <ViewToggle />
+                    </div>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-8">
@@ -249,12 +265,11 @@ export default async function ResourcesPage({
                             ))}
                         </div>
 
-                        {/* Results Count & Sort */}
-                        <div className="flex items-center justify-between mb-6">
+                        {/* Results Count */}
+                        <div className="flex items-center justify-between mb-6 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
                             <span className="text-sm text-gray-500 dark:text-gray-400">
                                 Showing <span className="font-semibold text-gray-900 dark:text-white">{resources.length}</span> of <span className="font-semibold text-gray-900 dark:text-white">{totalResources}</span> resources
                             </span>
-                            <ViewToggle />
                         </div>
 
                         {/* Resource Grid */}

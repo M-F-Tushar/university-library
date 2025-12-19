@@ -29,7 +29,7 @@ export default async function DashboardPage() {
                         Here's what's happening with your learning journey.
                     </p>
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-4 flex-wrap">
                     <Card className="p-4 flex items-center gap-4 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
                         <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30">
                             <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,6 +52,19 @@ export default async function DashboardPage() {
                             <p className="text-xl font-bold text-gray-900 dark:text-white">{data?.stats?.completed || 0}</p>
                         </div>
                     </Card>
+                    <Link href="/dashboard/upload">
+                        <Card className="p-4 flex items-center gap-4 bg-gradient-to-r from-blue-600 to-purple-600 shadow-sm border-none cursor-pointer hover:from-blue-700 hover:to-purple-700 transition-all">
+                            <div className="p-2 rounded-lg bg-white/20">
+                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p className="text-sm text-white/80">Contribute</p>
+                                <p className="text-base font-bold text-white">Upload Resource</p>
+                            </div>
+                        </Card>
+                    </Link>
                 </div>
             </div>
 
