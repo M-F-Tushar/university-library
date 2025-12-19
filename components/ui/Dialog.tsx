@@ -59,6 +59,23 @@ function Dialog({ open, onOpenChange, children }: DialogProps) {
     )
 }
 
+function DialogTrigger({ asChild, children, ...props }: { asChild?: boolean; children: React.ReactNode } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+    const { onOpenChange } = useDialogContext()
+
+    if (asChild && React.isValidElement(children)) {
+        return React.cloneElement(children as React.ReactElement<any>, {
+            onClick: () => onOpenChange(true),
+            ...props
+        })
+    }
+
+    return (
+        <button onClick={() => onOpenChange(true)} {...props}>
+            {children}
+        </button>
+    )
+}
+
 type DialogOverlayProps = React.HTMLAttributes<HTMLDivElement>
 
 function DialogOverlay({ className, ...props }: DialogOverlayProps) {
@@ -260,4 +277,5 @@ export {
     DialogFooter,
     DialogClose,
     DialogOverlay,
+    DialogTrigger,
 }

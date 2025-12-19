@@ -16,12 +16,14 @@ import {
     BuildingOfficeIcon,
     DocumentDuplicateIcon,
     ChatBubbleLeftIcon,
+    ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
     { name: 'Analytics', href: '/admin/analytics', icon: ChartBarIcon },
     { name: 'Reviews', href: '/admin/reviews', icon: ChatBubbleLeftIcon },
+    { name: 'Forum Moderation', href: '/admin/forum', icon: ShieldCheckIcon },
     { name: 'Site Settings', href: '/admin/settings', icon: Cog6ToothIcon },
     { name: 'Features', href: '/admin/features', icon: SparklesIcon },
     { name: 'Categories', href: '/admin/categories', icon: RectangleStackIcon },

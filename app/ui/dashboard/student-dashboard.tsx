@@ -4,22 +4,20 @@ import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 export default async function StudentDashboard() {
     const recentResources = await prisma.resource.findMany({
-        orderBy: { createdAt: 'desc' },
+        orderBy: { uploadedAt: 'desc' },
         take: 6,
+        include: {
+            course: {
+                select: { department: true }
+            }
+        }
     });
 
     return (
         <div className="space-y-6">
             <div className="rounded-lg bg-white p-6 shadow">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Find Resources</h2>
-                <div className="relative">
-                    <Link href="/resources" className="block w-full">
-                        <div className="flex items-center rounded-md border border-gray-300 bg-white px-4 py-3 text-gray-500 hover:border-blue-500 hover:text-blue-500 transition-colors">
-                            <MagnifyingGlassIcon className="mr-2 h-5 w-5" />
-                            <span>Search for books, notes, questions...</span>
-                        </div>
-                    </Link>
-                </div>
+                {/* ... search ... */}
                 <div className="mt-4 flex flex-wrap gap-2">
                     {['Computer Science', 'Electrical Eng', 'Business', 'Mathematics'].map((dept) => (
                         <Link key={dept} href={`/resources?department=${encodeURIComponent(dept)}`} className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700 hover:bg-gray-200">
@@ -42,16 +40,16 @@ export default async function StudentDashboard() {
                             <div className="p-5">
                                 <div className="flex items-center justify-between">
                                     <span className="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold leading-5 text-blue-800">
-                                        {resource.category}
+                                        {resource.resourceType}
                                     </span>
-                                    <span className="text-xs text-gray-500">{new Date(resource.createdAt).toLocaleDateString()}</span>
+                                    <span className="text-xs text-gray-500">{new Date(resource.uploadedAt).toLocaleDateString()}</span>
                                 </div>
                                 <Link href={`/resources/${resource.id}`} className="mt-2 block">
                                     <h3 className="text-lg font-medium text-gray-900 truncate" title={resource.title}>{resource.title}</h3>
                                     <p className="mt-1 text-sm text-gray-500 line-clamp-2">{resource.description}</p>
                                 </Link>
                                 <div className="mt-4 flex items-center justify-between">
-                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{resource.department}</span>
+                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{resource.course?.department || 'General'}</span>
                                     {/* Bookmark button could go here */}
                                 </div>
                             </div>

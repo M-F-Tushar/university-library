@@ -61,7 +61,7 @@ export default async function SearchPage({
                                         <div className="flex items-start justify-between gap-4">
                                             <div className="space-y-1">
                                                 <span className="inline-flex items-center rounded-full bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10">
-                                                    {resource.category}
+                                                    {resource.resourceType}
                                                 </span>
                                                 <CardTitle className="text-lg line-clamp-2">
                                                     <Link href={`/resources/${resource.id}`} className="hover:text-primary-600 transition-colors">
@@ -76,20 +76,13 @@ export default async function SearchPage({
                                             {resource.description}
                                         </CardDescription>
                                         <div className="space-y-2 text-sm text-gray-500">
-                                            <div className="flex items-center gap-2">
-                                                <UserIcon className="h-4 w-4" />
-                                                <span className="truncate">{resource.author || "Unknown Author"}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <CalendarIcon className="h-4 w-4" />
-                                                <span>{resource.year || "Year N/A"}</span>
-                                            </div>
+                                            {/* ... author/year display ... */}
                                         </div>
                                     </CardContent>
                                     <CardFooter className="border-t bg-gray-50/50 p-4">
                                         <div className="flex items-center justify-between w-full text-xs text-gray-500">
-                                            <span>{resource.department}</span>
-                                            <span>{resource.semester}</span>
+                                            <span>{resource.course?.department || 'General'}</span>
+                                            <span>{resource.course?.semester ? `Sem ${resource.course.semester}` : 'General'}</span>
                                         </div>
                                     </CardFooter>
                                 </Card>

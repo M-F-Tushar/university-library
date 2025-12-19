@@ -4,7 +4,7 @@ import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
-export async function submitReview(resourceId: string, rating: number, review?: string) {
+export async function submitReview(resourceId: string, rating: number, comment?: string) {
     const session = await auth()
     if (!session?.user?.id) {
         return { error: 'You must be logged in to submit a review' }
@@ -16,12 +16,10 @@ export async function submitReview(resourceId: string, rating: number, review?: 
 
     try {
         // Check if user already reviewed this resource
-        const existing = await prisma.resourceReview.findUnique({
+        const existing = await prisma.resourceReview.findFirst({
             where: {
-                userId_resourceId: {
-                    userId: session.user.id,
-                    resourceId,
-                },
+                reviewerId: session.user.id,
+                resourceId,
             },
         })
 
@@ -32,10 +30,10 @@ export async function submitReview(resourceId: string, rating: number, review?: 
         // Create review
         await prisma.resourceReview.create({
             data: {
-                userId: session.user.id,
+                reviewerId: session.user.id,
                 resourceId,
                 rating,
-                review,
+                comment,
             },
         })
 
@@ -54,7 +52,7 @@ export async function getResourceReviews(resourceId: string) {
             isApproved: true,
         },
         include: {
-            user: {
+            reviewer: {
                 select: {
                     name: true,
                     email: true,
@@ -83,7 +81,7 @@ export async function getResourceRating(resourceId: string) {
             },
             select: {
                 rating: true,
-                review: true,
+                comment: true,
             },
         })
 
@@ -91,7 +89,7 @@ export async function getResourceRating(resourceId: string) {
         const averageRating = totalRatings > 0
             ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalRatings
             : 0
-        const totalReviews = reviews.filter(r => r.review).length
+        const totalReviews = reviews.filter(r => r.comment).length
 
         // Create rating record
         rating = await prisma.resourceRating.create({
@@ -148,7 +146,7 @@ export async function deleteReview(reviewId: string) {
         }
 
         // Only allow user to delete their own review, or admin to delete any
-        if (review.userId !== session.user.id && session.user.role !== 'ADMIN') {
+        if (review.reviewerId !== session.user.id && session.user.role !== 'ADMIN') {
             return { error: 'Unauthorized' }
         }
 
@@ -176,7 +174,7 @@ async function updateResourceRating(resourceId: string) {
         },
         select: {
             rating: true,
-            review: true,
+            comment: true,
         },
     })
 
@@ -184,7 +182,7 @@ async function updateResourceRating(resourceId: string) {
     const averageRating = totalRatings > 0
         ? reviews.reduce((sum, r) => sum + r.rating, 0) / totalRatings
         : 0
-    const totalReviews = reviews.filter(r => r.review).length
+    const totalReviews = reviews.filter(r => r.comment).length
 
     await prisma.resourceRating.upsert({
         where: { resourceId },
@@ -213,7 +211,7 @@ export async function getPendingReviews() {
             isApproved: false,
         },
         include: {
-            user: {
+            reviewer: {
                 select: {
                     name: true,
                     email: true,

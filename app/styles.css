@@ -1,7 +1,7 @@
-@import "tailwindcss";
-
 /* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Lexend:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
 
 @layer theme, base, components, utilities;
 
@@ -12,12 +12,16 @@
     /* Brand Colors */
     --color-primary-50: #eff6ff;
     --color-primary-100: #dbeafe;
-    --color-primary-500: #3b82f6; /* Keep as fallback/reference */
-    --color-primary-600: #0066cc; /* New Primary */
+    --color-primary-500: #3b82f6;
+    /* Keep as fallback/reference */
+    --color-primary-600: #0066cc;
+    /* New Primary */
     --color-primary-700: #004c99;
 
-    --color-secondary: #00a86b; /* Teal */
-    --color-accent: #ffb84d; /* Gold */
+    --color-secondary: #00a86b;
+    /* Teal */
+    --color-accent: #ffb84d;
+    /* Gold */
 
     --color-success: #10b981;
     --color-warning: #f59e0b;

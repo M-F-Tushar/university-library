@@ -2,6 +2,8 @@ import { auth } from "@/auth"
 import { getDashboardData } from "@/lib/personalization/actions"
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed"
 import { ContinueReading } from "@/components/dashboard/ContinueReading"
+import { StudyStreak } from "@/components/dashboard/StudyStreak"
+import { EnrolledCourses } from "@/components/dashboard/EnrolledCourses"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import Link from "next/link"
 
@@ -12,6 +14,9 @@ export default async function DashboardPage() {
     if (!session?.user) {
         return <div>Please sign in to view your dashboard.</div>
     }
+
+    // Default to Year 1 Sem 1 if not set
+    const semesterInfo = data?.semesterInfo || { currentSemester: 1, currentYear: 1 };
 
     return (
         <div className="space-y-8">
@@ -50,19 +55,24 @@ export default async function DashboardPage() {
                 </div>
             </div>
 
-            {/* Continue Reading Section */}
-            {data?.continueReading && data.continueReading.length > 0 && (
-                <section>
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Continue Reading</h2>
-                    </div>
-                    <ContinueReading items={data.continueReading} />
-                </section>
-            )}
-
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content Area */}
                 <div className="lg:col-span-2 space-y-8">
+                    {/* Enrolled Courses */}
+                    <section>
+                        <EnrolledCourses courses={data?.enrolledCourses || []} semesterInfo={semesterInfo} />
+                    </section>
+
+                    {/* Continue Reading Section */}
+                    {data?.continueReading && data.continueReading.length > 0 && (
+                        <section>
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Continue Reading</h2>
+                            </div>
+                            <ContinueReading items={data.continueReading} />
+                        </section>
+                    )}
+
                     {/* Recommended Section */}
                     <section>
                         <div className="flex items-center justify-between mb-4">
@@ -93,6 +103,9 @@ export default async function DashboardPage() {
 
                 {/* Sidebar Area */}
                 <div className="space-y-8">
+                    {/* Study Streak */}
+                    <StudyStreak streak={data?.streak || 0} />
+
                     {/* Recent Activity */}
                     <section>
                         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h2>

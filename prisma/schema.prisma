@@ -10,76 +10,385 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============ USER MANAGEMENT ============
 model User {
-  id        String     @id @default(cuid())
-  name      String
-  email     String     @unique
-  password  String
-  role      String     @default("STUDENT") // SQLite doesn't support Enums
-  bookmarks Bookmark[]
-  activities UserActivity[]
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String?    // Optional for Magic Link / OAuth
+  image         String?
+  role          String    @default("STUDENT") // "STUDENT", "ADMIN", "FACULTY"
+  
+  // Profile & Progress
+  studentId     String?   // e.g. "C191001"
+  bio           String?
+  currentSemester Int?    @default(1)
+  currentYear   Int?      @default(1)
+  department    String?   // e.g. "Computer Science"
+  
+  // Relations
+  bookmarks     UserBookmark[]
+  activities    UserActivity[]
   readingProgress ReadingProgress[]
-  reviews   ResourceReview[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  uploadedResources Resource[] @relation("ResourceUploader")
+  approvedResources Resource[] @relation("ResourceApprover")
+  
+  // Forum
+  forumPosts    ForumDiscussion[] @relation("ForumPosts")
+  forumReplies  ForumReply[]      @relation("ForumReplies")
+  resolvedDiscussions ForumDiscussion[] @relation("ForumResolver")
+  helpfulDiscussions ForumDiscussion[] @relation("DiscussionHelpful")
+  helpfulReplies ForumReply[] @relation("ReplyHelpful")
+
+  // Academic
+  grades        StudentGrade[]
+  progress      GradesProgress?
+  labSubmissions LabSubmission[] @relation("LabSubmissions")
+  peerReviews   PeerReview[]
+  projects      Project[]
+  
+  // Community
+  createdGroups StudyGroup[] @relation("GroupCreator")
+  groups        StudyGroup[] @relation("GroupMembers")
+  sharedNotes   SharedNote[]
+  badges        AchievementBadge[] @relation("AchievementBadges")
+  analytics     UserAnalytics?
+  
+  // Reviews & Flags
+  resourceReviews ResourceReview[]
+  reportedFlags   ResourceFlag[]
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
+// ============ CURRICULUM MANAGEMENT ============
+model Course {
+  id          String    @id @default(cuid())
+  courseCode  String    @unique // e.g., "CSE 1101"
+  courseTitle String
+  credits     Float     
+  contactHours Float?
+  semester    Int       // 1-8
+  year        Int       // 1-4
+  department  String    @default("CSE") 
+  isTheory    Boolean   @default(true)
+  isSessional Boolean   @default(false)
+  description String?   
+  learningOutcomes String? 
+  instructor  String?
+  
+  // Relations
+  preRequisites   Course[] @relation("CoursePrerequisites")
+  prerequisiteOf  Course[] @relation("CoursePrerequisites")
+  
+  specialization  SpecializationTrack[] @relation("TrackCourses")
+  electiveFor     SpecializationTrack[] @relation("TrackElectives")
+  
+  resources       Resource[]
+  discussions     ForumDiscussion[]
+  projects        Project[]
+  grades          StudentGrade[]
+  labSubmissions  LabSubmission[]
+  studyGroups     StudyGroup[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model SpecializationTrack {
+  id          String    @id @default(cuid())
+  name        String    
+  description String?   
+  year        Int       
+  
+  requiredCourses Course[] @relation("TrackCourses")
+  electiveOptions Course[] @relation("TrackElectives")
+  
+  skillBadges String?   
+  projects    Project[]
+  
+  createdAt   DateTime @default(now())
+}
+
+// ============ RESOURCE MANAGEMENT ============
 model Resource {
-  id          String     @id @default(cuid())
+  id          String      @id @default(cuid())
   title       String
-  description String
-  author      String?    // New: Author name
-  year        Int?       // New: Publication year
-  format      String?    // New: PDF, ePub, PPT, etc.
-  fileUrl     String?
+  description String?     
+  
+  course      Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId    String
+  
+  resourceType String     
+  fileUrl     String
   externalUrl String?
-  coverImage  String?    // New: Book cover or thumbnail
-  abstract    String?    // New: For research papers
-  fileSize    String?    // New: e.g. "5MB"
-  category    String     // e.g., "Books", "Questions", "Notes"
-  department  String
-  course      String?
-  semester    String?
-  tags        String     // Stored as comma-separated string
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  bookmarks   Bookmark[]
-  activities  UserActivity[]
+  
+  year        Int?        // For Past Papers or publication year
+  
+  difficulty  String      @default("INTERMEDIATE") 
+  topics      String?     
+  
+  uploadedBy  User        @relation("ResourceUploader", fields: [uploadedById], references: [id])
+  uploadedById String
+  
+  uploadedAt  DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  rating      Float       @default(0) 
+  ratingCount Int         @default(0)
+  downloadCount Int       @default(0)
+  
+  isApproved  Boolean     @default(false)
+  approvedBy  User?       @relation("ResourceApprover", fields: [approvedById], references: [id])
+  approvedById String?
+  
+  // Past Paper Specifics
+  isPastPaper Boolean     @default(false)
+  examYear    Int?
+  examSemester Int?       
+  hasSolution Boolean     @default(false)
+  solutionUrl String?
+
+  // Relations
+  bookmarkedBy UserBookmark[]
+  reviews      ResourceReview[]
+  flags        ResourceFlag[]
+  activities   UserActivity[]
   readingProgress ReadingProgress[]
-  reviews     ResourceReview[]
-  rating      ResourceRating?
+  resourceRating ResourceRating?
 }
 
-model Bookmark {
+model UserBookmark {
   id         String   @id @default(cuid())
-  userId     String
-  resourceId String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
   resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+  resourceId String
+  bookmarkedAt DateTime @default(now())
+  collection String? 
 
   @@unique([userId, resourceId])
 }
 
-// CMS Models for dynamic content management
+model ResourceReview {
+  id         String   @id @default(cuid())
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  resourceId String
+  reviewer   User     @relation(fields: [reviewerId], references: [id])
+  reviewerId String
+  rating     Int      
+  comment    String?  
+  helpful    Boolean?
+  isApproved Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt 
+}
+
+model ResourceRating {
+  id            String   @id @default(cuid())
+  resourceId    String   @unique
+  averageRating Float    @default(0)
+  totalRatings  Int      @default(0)
+  totalReviews  Int      @default(0)
+  updatedAt     DateTime @updatedAt
+  
+  resource      Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+}
+
+model ResourceFlag {
+  id         String   @id @default(cuid())
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  resourceId String
+  reporter   User     @relation(fields: [reporterId], references: [id])
+  reporterId String
+  reason     String   
+  description String? 
+  status     String   @default("PENDING") 
+  createdAt  DateTime @default(now())
+}
+
+// ============ COMMUNITY & DISCUSSION ============
+model ForumDiscussion {
+  id          String    @id @default(cuid())
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId    String
+  title       String
+  content     String    
+  author      User      @relation("ForumPosts", fields: [authorId], references: [id])
+  authorId    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  replies     ForumReply[]
+  
+  isResolved  Boolean   @default(false)
+  resolvedBy  User?     @relation("ForumResolver", fields: [resolvedById], references: [id])
+  resolvedById String?
+  
+  tags        String?   
+  helpful     User[]    @relation("DiscussionHelpful")
+  views       Int       @default(0)
+}
+
+model ForumReply {
+  id          String          @id @default(cuid())
+  discussion  ForumDiscussion @relation(fields: [discussionId], references: [id], onDelete: Cascade)
+  discussionId String
+  content     String          
+  author      User            @relation("ForumReplies", fields: [authorId], references: [id])
+  authorId    String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  
+  helpful     User[]          @relation("ReplyHelpful")
+  isMarkedSolution Boolean    @default(false)
+}
+
+// ============ ASSESSMENT & PERFORMANCE ============
+model StudentGrade {
+  id          String   @id @default(cuid())
+  student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId   String
+  course      Course   @relation(fields: [courseId], references: [id])
+  courseId    String
+  grade       String   
+  gradePoint  Float
+  semester    Int
+  year        Int
+  recordedAt  DateTime @default(now())
+
+  @@unique([studentId, courseId, semester, year])
+}
+
+model GradesProgress {
+  id              String   @id @default(cuid())
+  student         User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId       String   @unique
+  currentGPA      Float
+  cumulativeGPA   Float
+  creditsEarned   Float    
+  creditsAttempted Float   
+  semesterGPA     Float
+  academicStanding String 
+  lastUpdated     DateTime @updatedAt
+}
+
+// ============ PEER REVIEW & LABS ============
+model LabSubmission {
+  id             String    @id @default(cuid())
+  student        User      @relation("LabSubmissions", fields: [studentId], references: [id])
+  studentId      String
+  course         Course    @relation(fields: [courseId], references: [id])
+  courseId       String
+  labNumber      Int
+  submissionCode String    
+  language       String    
+  submittedAt    DateTime  @default(now())
+  reviewed       Boolean   @default(false)
+  peerReviews    PeerReview[]
+  isPublic       Boolean   @default(false) 
+}
+
+model PeerReview {
+  id           String        @id @default(cuid())
+  submission   LabSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  submissionId String
+  reviewer     User          @relation(fields: [reviewerId], references: [id])
+  reviewerId   String
+  feedback     String        
+  rating       Int           
+  createdAt    DateTime      @default(now())
+}
+
+// ============ PROJECTS & PORTFOLIO ============
+model Project {
+  id              String    @id @default(cuid())
+  student         User      @relation(fields: [studentId], references: [id])
+  studentId       String
+  course          Course    @relation(fields: [courseId], references: [id])
+  courseId        String
+  specialization  SpecializationTrack? @relation(fields: [specializationId], references: [id])
+  specializationId String?
+  title           String
+  description     String    
+  githubUrl       String?
+  liveUrl         String?
+  technologies    String?   
+  semester        Int
+  year            Int
+  isPublished     Boolean   @default(false)
+  createdAt       DateTime  @default(now())
+}
+
+// ============ ADDITIONAL FEATURES ============
+model StudyGroup {
+  id          String      @id @default(cuid())
+  name        String
+  description String?     
+  course      Course      @relation(fields: [courseId], references: [id])
+  courseId    String
+  creator     User        @relation("GroupCreator", fields: [creatorId], references: [id])
+  creatorId   String
+  members     User[]      @relation("GroupMembers")
+  isPrivate   Boolean     @default(false)
+  sharedNotes SharedNote[]
+  createdAt   DateTime    @default(now())
+}
+
+model SharedNote {
+  id        String     @id @default(cuid())
+  group     StudyGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId   String
+  author    User       @relation(fields: [authorId], references: [id])
+  authorId  String
+  title     String
+  content   String     
+  tags      String?    
+  createdAt DateTime   @default(now())
+}
+
+model AchievementBadge {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  icon        String
+  requirement String   
+  awardedTo   User[]   @relation("AchievementBadges")
+}
+
+model UserAnalytics {
+  id            String    @id @default(cuid())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String    @unique
+  totalResourcesAccessed Int @default(0)
+  totalTimeSpent Int      @default(0) // in minutes
+  favoriteResourceType String?
+  mostVisitedCourses String? // Comma separated IDs
+  lastActivityAt DateTime @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// ============ LEGACY / CMS MODELS ============
+
 model SiteSettings {
   id          String   @id @default(cuid())
-  key         String   @unique  // e.g., "hero_title", "hero_subtitle", "stat_resources"
-  value       String              // The actual content
-  type        String   @default("text") // "text", "number", "boolean", "json"
-  category    String              // "hero", "stats", "features", "general"
-  description String?             // Help text for admin
+  key         String   @unique 
+  value       String   
+  type        String   @default("text") 
+  category    String   
+  description String?  
   updatedAt   DateTime @updatedAt
-  updatedBy   String?             // Admin user ID who last updated
+  updatedBy   String?  
 }
 
 model Feature {
   id          String   @id @default(cuid())
   title       String
   description String
-  icon        String              // Icon name from Heroicons (e.g., "BookOpenIcon")
-  link        String?             // Optional link URL for clickable features
-  coverImage  String?             // Optional book cover image URL
+  icon        String   
+  link        String?  
+  coverImage  String?  
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -89,7 +398,7 @@ model Announcement {
   id          String    @id @default(cuid())
   title       String
   content     String
-  type        String    @default("info")  // "info", "warning", "success", "error"
+  type        String    @default("info")
   isActive    Boolean   @default(true)
   startDate   DateTime?
   endDate     DateTime?
@@ -102,7 +411,7 @@ model ExternalResource {
   name        String
   url         String
   description String
-  category    String   // "Learning Platforms", "Programming Practice", etc.
+  category    String   
   order       Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -111,80 +420,33 @@ model ExternalResource {
 
 model PageComment {
   id        String   @id @default(cuid())
-  pageUrl   String   // e.g., "/about", "/courses", "/external-resources"
+  pageUrl   String   
   userId    String
-  userName  String   // Denormalized for easier display
-  userEmail String   // Denormalized
+  userName  String   
+  userEmail String   
   comment   String
-  isApproved Boolean @default(false) // Admin must approve before showing
+  isApproved Boolean @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Course {
-  id          String   @id @default(cuid())
-  code        String   @unique // e.g., "CSE101"
-  name        String   // e.g., "Introduction to Programming"
-  description String?
-  department  String   // e.g., "Computer Science"
-  semester    String?  // e.g., "1st", "2nd"
-  credits     Int      @default(3)
-  isActive    Boolean  @default(true)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Semester {
-  id          String   @id @default(cuid())
-  name        String   // e.g. "1st Semester"
-  value       String   @unique // e.g. "1st" - used for URL params
-  description String?
-  order       Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Category {
-  id          String   @id @default(cuid())
-  name        String   @unique // e.g., "Books", "Papers", "Questions"
-  description String?
-  icon        String   @default("BookOpenIcon") // Icon name from Heroicons
-  color       String   @default("bg-blue-100 text-blue-800 border-blue-200") // Tailwind classes
-  order       Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Department {
-  id        String   @id @default(cuid())
-  name      String   @unique // e.g., "Computer Science"
-  code      String?  // e.g., "CS"
-  order     Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Format {
-  id        String   @id @default(cuid())
-  name      String   @unique // e.g., "PDF"
-  extension String   // e.g., "pdf"
-  mimeType  String?  // e.g., "application/pdf"
-  order     Int      @default(0)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model VerificationToken {
+  id         String   @id @default(cuid())
+  email      String
+  token      String   @unique
+  expires    DateTime
+  createdAt  DateTime @default(now())
+  
+  @@index([email])
+  @@index([token])
 }
 
 model UserActivity {
   id         String   @id @default(cuid())
   userId     String
-  action     String   // 'view', 'bookmark', 'download', 'search'
+  action     String   
   resourceId String?
-  details    String?  // JSON string for extra details
+  details    String?  
   createdAt  DateTime @default(now())
   
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -211,43 +473,47 @@ model ReadingProgress {
   @@index([lastReadAt])
 }
 
-model ResourceReview {
-  id         String   @id @default(cuid())
-  userId     String
-  resourceId String
-  rating     Int      // 1-5 stars
-  review     String?  // Optional text review
-  isApproved Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, resourceId])
-  @@index([resourceId])
-  @@index([isApproved])
+// Restored CMS Models
+model Semester {
+  id          String   @id @default(cuid())
+  name        String   
+  value       String   @unique 
+  description String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
-model ResourceRating {
-  id            String   @id @default(cuid())
-  resourceId    String   @unique
-  averageRating Float    @default(0)
-  totalRatings  Int      @default(0)
-  totalReviews  Int      @default(0)
-  updatedAt     DateTime @updatedAt
-  
-  resource      Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique 
+  description String?
+  icon        String   @default("BookOpenIcon") 
+  color       String   @default("bg-blue-100 text-blue-800 border-blue-200") 
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
-// Email verification for magic link authentication
-model VerificationToken {
-  id         String   @id @default(cuid())
-  email      String
-  token      String   @unique
-  expires    DateTime
-  createdAt  DateTime @default(now())
-  
-  @@index([email])
-  @@index([token])
+model Department {
+  id        String   @id @default(cuid())
+  name      String   @unique 
+  code      String?  
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Format {
+  id        String   @id @default(cuid())
+  name      String   @unique 
+  extension String   
+  mimeType  String?  
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

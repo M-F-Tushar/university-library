@@ -1,3 +1,5 @@
+'use client';
+
 import { WifiIcon } from "@heroicons/react/24/outline"
 import { Button } from "@/components/ui/Button"
 import Link from "next/link"

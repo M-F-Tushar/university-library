@@ -23,10 +23,10 @@ export async function getOverviewMetrics() {
         prisma.resource.count(),
         prisma.userActivity.count(),
         prisma.user.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
-        prisma.resource.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
+        prisma.resource.count({ where: { uploadedAt: { gte: thirtyDaysAgo } } }),
         prisma.userActivity.count({ where: { createdAt: { gte: thirtyDaysAgo } } }),
         prisma.user.count({ where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } }),
-        prisma.resource.count({ where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } }),
+        prisma.resource.count({ where: { uploadedAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } }),
         prisma.userActivity.count({ where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } } }),
     ])
 
@@ -70,9 +70,9 @@ export async function getPopularResources(limit = 10) {
         select: {
             id: true,
             title: true,
-            category: true,
-            department: true,
-            createdAt: true,
+            resourceType: true,
+            course: { select: { department: true } },
+            uploadedAt: true,
         },
     })
 
@@ -82,8 +82,8 @@ export async function getPopularResources(limit = 10) {
             resourceId: item.resourceId,
             views: item._count.id,
             title: resource?.title || 'Unknown',
-            category: resource?.category || 'Unknown',
-            department: resource?.department || 'Unknown',
+            category: resource?.resourceType || 'Unknown',
+            department: resource?.course.department || 'Unknown',
         }
     })
 }
@@ -152,7 +152,7 @@ export async function getSearchTrends(limit = 10) {
 
 export async function getCategoryBreakdown() {
     const breakdown = await prisma.resource.groupBy({
-        by: ['category'],
+        by: ['resourceType'],
         _count: {
             id: true,
         },
@@ -164,7 +164,7 @@ export async function getCategoryBreakdown() {
     })
 
     return breakdown.map(item => ({
-        category: item.category,
+        category: item.resourceType,
         count: item._count.id,
     }))
 }

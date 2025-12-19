@@ -1,8 +1,7 @@
 "use client"
 
 import * as React from "react"
-import type { ClassValue } from "clsx"
-import { clsx } from "clsx"
+import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { X } from "lucide-react"
 
@@ -109,5 +108,32 @@ export function SheetContent({
                 {children}
             </div>
         </div>
+    )
+}
+
+export function SheetHeader({
+    className,
+    ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+    return (
+        <div
+            className={cn(
+                "flex flex-col space-y-2 text-center sm:text-left",
+                className
+            )}
+            {...props}
+        />
+    )
+}
+
+export function SheetTitle({
+    className,
+    ...props
+}: React.HTMLAttributes<HTMLHeadingElement>) {
+    return (
+        <h2
+            className={cn("text-lg font-semibold text-gray-950 dark:text-gray-50", className)}
+            {...props}
+        />
     )
 }

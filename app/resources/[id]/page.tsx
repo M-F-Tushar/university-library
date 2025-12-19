@@ -13,6 +13,10 @@ export default async function ResourceDetailsPage({ params }: { params: Promise<
     const { id } = await params;
     const resource = await prisma.resource.findUnique({
         where: { id },
+        include: {
+            course: true,
+            uploadedBy: { select: { name: true } }
+        }
     });
 
     if (!resource) {
@@ -60,14 +64,14 @@ export default async function ResourceDetailsPage({ params }: { params: Promise<
                             {/* Header Section */}
                             <div className="p-6 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
                                 <div className="flex flex-wrap gap-2 mb-4">
-                                    <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200">{resource.department}</Badge>
-                                    {resource.course && <Badge variant="outline">{resource.course}</Badge>}
-                                    {resource.semester && <Badge variant="outline">{resource.semester} Sem</Badge>}
-                                    <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700">{resource.type}</Badge>
+                                    <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200">{resource.course?.department || 'General'}</Badge>
+                                    {resource.course && <Badge variant="outline">{resource.course.courseCode}</Badge>}
+                                    {resource.course?.semester && <Badge variant="outline">{resource.course.semester} Sem</Badge>}
+                                    <Badge variant="secondary" className="bg-gray-100 dark:bg-gray-700">{resource.resourceType}</Badge>
                                 </div>
                                 <h1 className="text-3xl font-display font-bold text-gray-900 dark:text-white mb-2 leading-tight">{resource.title}</h1>
                                 <p className="text-gray-500 dark:text-gray-400">
-                                    Uploaded by <span className="font-medium text-gray-900 dark:text-white">{resource.author || "Unknown"}</span> • {formatDistanceToNow(new Date(resource.createdAt), { addSuffix: true })}
+                                    Uploaded by <span className="font-medium text-gray-900 dark:text-white">{resource.uploadedBy?.name || "Unknown"}</span> • {formatDistanceToNow(new Date(resource.uploadedAt), { addSuffix: true })}
                                 </p>
                             </div>
 
@@ -133,11 +137,11 @@ export default async function ResourceDetailsPage({ params }: { params: Promise<
                             <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
                                     <span className="block text-gray-500 text-xs">Downloads</span>
-                                    <span className="font-medium">{resource.downloads || 0}</span>
+                                    <span className="font-medium">0</span>
                                 </div>
                                 <div>
                                     <span className="block text-gray-500 text-xs">File Size</span>
-                                    <span className="font-medium">{resource.fileSize || "Unknown"}</span>
+                                    <span className="font-medium">Unknown</span>
                                 </div>
                                 <div>
                                     <span className="block text-gray-500 text-xs">Format</span>
@@ -145,7 +149,7 @@ export default async function ResourceDetailsPage({ params }: { params: Promise<
                                 </div>
                                 <div>
                                     <span className="block text-gray-500 text-xs">Course</span>
-                                    <span className="font-medium">{resource.department}</span>
+                                    <span className="font-medium">{resource.course?.department || resource.course?.courseCode || "N/A"}</span>
                                 </div>
                             </div>
                         </div>

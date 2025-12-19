@@ -11,20 +11,26 @@ import {
 } from '@heroicons/react/24/outline';
 
 export default async function AdminDashboard() {
-    const [totalResources, totalUsers, totalFeatures, totalAnnouncements, resourcesByCategory] = await Promise.all([
+    const [totalResources, totalFeatures, totalAnnouncements, resourcesByType] = await Promise.all([
         prisma.resource.count(),
-        prisma.user.count(),
         prisma.feature.count({ where: { isActive: true } }),
         prisma.announcement.count({ where: { isActive: true } }),
         prisma.resource.groupBy({
-            by: ['category'],
-            _count: { category: true },
+            by: ['resourceType'],
+            _count: { resourceType: true },
         }),
     ]);
 
+    const totalUsers = await prisma.user.count(); // Separate count queries if needed or keep alongside
+
     const recentResources = await prisma.resource.findMany({
-        orderBy: { createdAt: 'desc' },
+        orderBy: { uploadedAt: 'desc' },
         take: 5,
+        include: {
+            course: {
+                select: { department: true }
+            }
+        }
     });
 
     const stats = [
@@ -90,12 +96,12 @@ export default async function AdminDashboard() {
 
             {/* Resources by Category */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Resources by Category</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Resources by Type</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {resourcesByCategory.map((item) => (
-                        <div key={item.category} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
-                            <p className="text-sm font-medium text-gray-600">{item.category}</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">{item._count.category}</p>
+                    {resourcesByType.map((item) => (
+                        <div key={item.resourceType} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
+                            <p className="text-sm font-medium text-gray-600">{item.resourceType}</p>
+                            <p className="text-2xl font-bold text-gray-900 mt-1">{item._count.resourceType}</p>
                         </div>
                     ))}
                 </div>
@@ -120,7 +126,7 @@ export default async function AdminDashboard() {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Title</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Category</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Department</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Date</th>
                             </tr>
@@ -133,14 +139,14 @@ export default async function AdminDashboard() {
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4">
                                         <span className="inline-flex rounded-lg bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 border border-green-200">
-                                            {resource.category}
+                                            {resource.resourceType}
                                         </span>
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                        {resource.department}
+                                        {resource.course?.department || 'N/A'}
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                        {new Date(resource.createdAt).toLocaleDateString()}
+                                        {new Date(resource.uploadedAt).toLocaleDateString()}
                                     </td>
                                 </tr>
                             ))}

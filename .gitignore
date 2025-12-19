@@ -45,3 +45,13 @@ next-env.d.ts
 tsc_output.txt
 
 /app/generated/prisma
+
+# database
+*.db
+*.db-journal
+*.sqlite
+*.sqlite-journal
+
+# os
+.DS_Store
+Thumbs.db

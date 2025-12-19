@@ -4,8 +4,13 @@ import { PlusIcon, PencilIcon, Cog6ToothIcon, SparklesIcon, MegaphoneIcon } from
 
 export default async function AdminDashboard() {
     const resources = await prisma.resource.findMany({
-        orderBy: { createdAt: 'desc' },
+        orderBy: { uploadedAt: 'desc' },
         take: 10,
+        include: {
+            course: {
+                select: { department: true }
+            }
+        }
     });
 
     const totalResources = await prisma.resource.count();
@@ -95,15 +100,15 @@ export default async function AdminDashboard() {
                                 <tr key={resource.id} className="hover:bg-gray-50 transition-colors">
                                     <td className="whitespace-nowrap px-6 py-4">
                                         <div className="text-sm font-medium text-gray-900">{resource.title}</div>
-                                        <div className="text-sm text-gray-500">{resource.department}</div>
+                                        <div className="text-sm text-gray-500">{resource.course?.department || 'General'}</div>
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4">
                                         <span className="inline-flex rounded-lg bg-green-100 px-3 py-1 text-xs font-semibold text-green-800 border border-green-200">
-                                            {resource.category}
+                                            {resource.resourceType}
                                         </span>
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                        {new Date(resource.createdAt).toLocaleDateString()}
+                                        {new Date(resource.uploadedAt).toLocaleDateString()}
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                         <Link href={`/resources/${resource.id}/edit`} className="text-blue-600 hover:text-blue-800 font-medium">

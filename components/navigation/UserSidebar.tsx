@@ -8,12 +8,20 @@ import {
     Cog6ToothIcon,
     BookOpenIcon,
     UserCircleIcon,
+    CalculatorIcon,
+    ChartBarIcon,
+    TrophyIcon,
+    ClipboardDocumentCheckIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
     { name: 'Overview', href: '/dashboard', icon: HomeIcon },
     { name: 'My Bookmarks', href: '/bookmarks', icon: BookmarkIcon },
     { name: 'Browse Resources', href: '/resources', icon: BookOpenIcon },
+    { name: 'GPA Calculator', href: '/tools/gpa', icon: CalculatorIcon },
+    { name: 'My Analytics', href: '/analytics', icon: ChartBarIcon },
+    { name: 'Leaderboard', href: '/leaderboard', icon: TrophyIcon },
+    { name: 'Peer Reviews', href: '/dashboard/reviews', icon: ClipboardDocumentCheckIcon },
     { name: 'Settings', href: '/dashboard/settings', icon: Cog6ToothIcon },
 ];
 

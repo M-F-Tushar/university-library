@@ -44,6 +44,8 @@ export function GlobalHeader({ user }: GlobalHeaderProps) {
                                     <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Core</div>
                                     <Link href="/" className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md font-medium">Home</Link>
                                     <Link href="/courses" className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md font-medium">Courses</Link>
+                                    <Link href="/dashboard" className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md font-medium">Dashboard</Link>
+                                    <Link href="/leaderboard" className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md font-medium">Leaderboard</Link>
 
                                     <div className="mt-4 px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Resources</div>
                                     <Link href="/resources?category=Questions" className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md font-medium text-primary-600">Past Questions</Link>
@@ -77,6 +79,9 @@ export function GlobalHeader({ user }: GlobalHeaderProps) {
                         </Link>
                         <Link href="/resources" className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors">
                             Resources
+                        </Link>
+                        <Link href="/leaderboard" className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors">
+                            Leaderboard
                         </Link>
                         <Link href="/tools" className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors">
                             Tools

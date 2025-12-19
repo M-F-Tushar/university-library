@@ -1,48 +1,22 @@
-import {
-    BookOpenIcon,
-    AcademicCapIcon,
-    Squares2X2Icon,
-    CalendarIcon,
-    GlobeAltIcon,
-    InformationCircleIcon,
-} from '@heroicons/react/24/outline';
-import type { ComponentType, SVGProps } from 'react';
+import { BookOpen, Home, LayoutDashboard, Library, Trophy, Users } from "lucide-react";
 
-export interface NavigationItem {
-    name: string;
-    href: string;
-    icon?: ComponentType<SVGProps<SVGSVGElement>>;
-}
+export const mainNavigation = [
+    { name: "Home", href: "/", icon: Home },
+    { name: "Courses", href: "/courses", icon: BookOpen },
+    { name: "Resources", href: "/resources", icon: Library },
+    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { name: "Community", href: "/leaderboard", icon: Users }, // Leaderboard/Forum entry
+];
 
-export const mainNavigation: NavigationItem[] = [
-    {
-        name: 'Browse',
-        href: '/resources',
-        icon: BookOpenIcon,
-    },
-    {
-        name: 'Courses',
-        href: '/courses',
-        icon: AcademicCapIcon,
-    },
-    {
-        name: 'Categories',
-        href: '/categories',
-        icon: Squares2X2Icon,
-    },
-    {
-        name: 'Semesters',
-        href: '/semesters',
-        icon: CalendarIcon,
-    },
-    {
-        name: 'External Resources',
-        href: '/external-resources',
-        icon: GlobeAltIcon,
-    },
-    {
-        name: 'About',
-        href: '/about',
-        icon: InformationCircleIcon,
-    },
+export const userNavigation = [
+    { name: "Profile", href: "/profile" },
+    { name: "Settings", href: "/settings" },
+    { name: "Sign out", href: "#" },
+];
+
+export const dashboardNavigation = [
+    { name: "Overview", href: "/dashboard" },
+    { name: "My Courses", href: "/dashboard/courses" },
+    { name: "Assignments", href: "/dashboard/assignments" },
+    { name: "Grades", href: "/dashboard/grades" },
 ];

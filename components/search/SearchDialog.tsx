@@ -15,7 +15,7 @@ interface SearchDialogProps {
 export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
     const [query, setQuery] = React.useState("")
     const [debouncedQuery] = useDebounce(query, 300)
-    const [results, setResults] = React.useState<Resource[]>([])
+    const [results, setResults] = React.useState<(Resource & { course: { department: string } | null })[]>([])
     const [loading, setLoading] = React.useState(false)
     const inputRef = React.useRef<HTMLInputElement>(null)
 
@@ -136,7 +136,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                                             {resource.title}
                                         </p>
                                         <p className="text-xs text-gray-500 truncate">
-                                            {resource.category} • {resource.department}
+                                            {resource.resourceType} • {resource.course?.department || 'General'}
                                         </p>
                                     </div>
                                 </Link>

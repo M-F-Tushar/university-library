@@ -4,11 +4,14 @@ import { PlusIcon, PencilIcon, DocumentTextIcon } from '@heroicons/react/24/outl
 
 export default async function ResourcesPage() {
     const resources = await prisma.resource.findMany({
-        orderBy: { createdAt: 'desc' },
+        orderBy: { uploadedAt: 'desc' },
         include: {
             _count: {
-                select: { bookmarks: true },
+                select: { bookmarkedBy: true },
             },
+            course: {
+                select: { courseCode: true, department: true }
+            }
         },
     });
 
@@ -16,6 +19,7 @@ export default async function ResourcesPage() {
         'Books': 'bg-blue-100 text-blue-700 border-blue-200',
         'Questions': 'bg-purple-100 text-purple-700 border-purple-200',
         'Notes': 'bg-green-100 text-green-700 border-green-200',
+        'Past Paper': 'bg-yellow-100 text-yellow-700 border-yellow-200',
         'Other': 'bg-gray-100 text-gray-700 border-gray-200',
     };
 
@@ -43,7 +47,7 @@ export default async function ResourcesPage() {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Title</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Category</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Type</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Department</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Course</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Bookmarks</th>
@@ -66,21 +70,21 @@ export default async function ResourcesPage() {
                                         </div>
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4">
-                                        <span className={`inline-flex rounded-lg px-3 py-1 text-xs font-semibold border ${categoryColors[resource.category] || categoryColors['Other']}`}>
-                                            {resource.category}
+                                        <span className={`inline-flex rounded-lg px-3 py-1 text-xs font-semibold border ${categoryColors[resource.resourceType] || categoryColors['Other']}`}>
+                                            {resource.resourceType}
                                         </span>
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                        {resource.department}
+                                        {resource.course?.department || 'N/A'}
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                        {resource.course || '-'}
+                                        {resource.course?.courseCode || '-'}
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                        {resource._count.bookmarks}
+                                        {resource._count.bookmarkedBy}
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-500">
-                                        {new Date(resource.createdAt).toLocaleDateString()}
+                                        {new Date(resource.uploadedAt).toLocaleDateString()}
                                     </td>
                                     <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
                                         <Link

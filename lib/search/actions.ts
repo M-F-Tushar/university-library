@@ -21,34 +21,65 @@ export async function searchResources(filters: SearchFilters) {
         if (query) {
             conditions.push({
                 OR: [
-                    { title: { contains: query } }, // SQLite is case-insensitive by default for ASCII
+                    { title: { contains: query } },
                     { description: { contains: query } },
-                    { tags: { contains: query } },
-                    { author: { contains: query } },
+                    { topics: { contains: query } },
+                    {
+                        course: { // Search in related Course
+                            OR: [
+                                { courseTitle: { contains: query } },
+                                { courseCode: { contains: query } }
+                            ]
+                        }
+                    }
                 ],
             })
         }
 
         if (category) {
-            conditions.push({ category })
+            conditions.push({ resourceType: category })
         }
 
         if (department) {
-            conditions.push({ department })
+            conditions.push({
+                course: {
+                    department: department
+                }
+            })
         }
 
         if (semester) {
-            conditions.push({ semester })
+            // Try to parse '1st' -> 1
+            const semInt = parseInt(semester)
+            if (!isNaN(semInt)) {
+                conditions.push({ course: { semester: semInt } })
+            }
         }
 
-        const where: Prisma.ResourceWhereInput = conditions.length > 0 ? { AND: conditions } : {}
+        // Only show approved resources
+        conditions.push({ isApproved: true })
+
+        const where: Prisma.ResourceWhereInput = conditions.length > 0 ? { AND: conditions } : { isApproved: true }
 
         const resources = await prisma.resource.findMany({
             where,
             take: limit,
             orderBy: {
-                createdAt: 'desc',
+                rating: 'desc', // Better sorting
             },
+            include: {
+                course: {
+                    select: {
+                        courseCode: true,
+                        courseTitle: true,
+                        department: true,
+                        semester: true
+                    }
+                },
+                uploadedBy: {
+                    select: { name: true }
+                }
+            }
         })
 
         return { resources }
