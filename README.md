@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 A full-stack web application for university students to access books, past questions, notes, and digital resources. 
-  
+   
 ## ✨ Features 
 
 - **User Roles**: Admin and Student with role-based access control
