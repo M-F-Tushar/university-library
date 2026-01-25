@@ -5,7 +5,7 @@
 [![Prisma](https://img.shields.io/badge/Prisma-5.22-2D3748?logo=prisma)](https://www.prisma.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-A full-stack web application for university students to access books, past questions, notes, and digital resources.
+A full-stack web application for university students to access books, past questions, notes, and digital resources. 
  
 ## ✨ Features 
 
