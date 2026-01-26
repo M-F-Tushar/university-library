@@ -7,7 +7,7 @@
 
 A full-stack web application for university students to access books, past questions, notes, and digital resources. 
    
-## ✨ Features 
+## ✨ Features  
 
 - **User Roles**: Admin and Student with role-based access control
 - **Resource Management**: Upload PDFs, add external links, categorize by department/course
